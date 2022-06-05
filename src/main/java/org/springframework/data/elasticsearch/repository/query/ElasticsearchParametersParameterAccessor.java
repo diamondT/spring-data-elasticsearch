@@ -18,7 +18,9 @@ package org.springframework.data.elasticsearch.repository.query;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
@@ -39,6 +41,12 @@ class ElasticsearchParametersParameterAccessor extends ParametersParameterAccess
 
 		super(method.getParameters(), values);
 		this.values = Arrays.asList(values);
+	}
+
+	@Nullable
+	@Override
+	public <T> T getValue(Parameter parameter) {
+		return super.getValue(parameter.getIndex());
 	}
 
 	@Override

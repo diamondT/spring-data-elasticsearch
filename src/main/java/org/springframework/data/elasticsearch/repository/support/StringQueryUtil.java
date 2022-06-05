@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.elasticsearch.repository.query.ElasticsearchParameterAccessor;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.util.NumberUtils;
 
@@ -34,11 +35,17 @@ final public class StringQueryUtil {
 
 	private final ConversionService conversionService;
 
-	public StringQueryUtil(ConversionService conversionService) {
+	private final boolean useNamedParameters;
+
+	public StringQueryUtil(ConversionService conversionService, boolean useNamedParameters) {
 		this.conversionService = conversionService;
+		this.useNamedParameters = useNamedParameters;
 	}
 
-	public String replacePlaceholders(String input, ParameterAccessor accessor) {
+	public String replacePlaceholders(String input, ElasticsearchParameterAccessor accessor) {
+		if (useNamedParameters) {
+			return replaceNamedParameters(input, accessor);
+		}
 
 		Matcher matcher = PARAMETER_PLACEHOLDER.matcher(input);
 		String result = input;
@@ -49,6 +56,14 @@ final public class StringQueryUtil {
 			result = result.replaceAll(placeholder, Matcher.quoteReplacement(getParameterWithIndex(accessor, index)));
 		}
 		return result;
+	}
+
+	private String replaceNamedParameters(String input, ElasticsearchParameterAccessor accessor) {
+
+		final String[] result = { input };
+		accessor.getParameters().forEach(parameter -> result[0] = result[0]
+				.replaceAll(Pattern.quote(parameter.getPlaceholder()), getParameterWithIndex(accessor, parameter.getIndex())));
+		return result[0];
 	}
 
 	private String getParameterWithIndex(ParameterAccessor accessor, int index) {

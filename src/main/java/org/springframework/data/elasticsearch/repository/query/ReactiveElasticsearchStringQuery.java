@@ -46,10 +46,10 @@ public class ReactiveElasticsearchStringQuery extends AbstractReactiveElasticsea
 	}
 
 	@Override
-	protected StringQuery createQuery(ElasticsearchParameterAccessor parameterAccessor) {
+	protected StringQuery createQuery(ElasticsearchParameterAccessor parameterAccessor, boolean useNamedParameters) {
 		String queryString = new StringQueryUtil(
-				getElasticsearchOperations().getElasticsearchConverter().getConversionService()).replacePlaceholders(this.query,
-						parameterAccessor);
+				getElasticsearchOperations().getElasticsearchConverter().getConversionService(), useNamedParameters)
+						.replacePlaceholders(this.query, parameterAccessor);
 		return new StringQuery(queryString);
 	}
 

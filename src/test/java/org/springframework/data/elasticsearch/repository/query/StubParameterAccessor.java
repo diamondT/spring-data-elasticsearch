@@ -17,11 +17,12 @@ package org.springframework.data.elasticsearch.repository.query;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.ParameterAccessor;
+import org.springframework.data.repository.query.Parameters;
 
 /**
  * Simple {@link ParameterAccessor} that returns the given parameters unfiltered.
@@ -80,6 +81,16 @@ class StubParameterAccessor implements ElasticsearchParameterAccessor {
 	@Override
 	public Iterator<Object> iterator() {
 		return Arrays.asList(values).iterator();
+	}
+
+	@Override
+	public Parameters<?, ?> getParameters() {
+		throw new UnsupportedOperationException("Method getParameters not supported for StubParameterAccessor");
+	}
+
+	@Override
+	public <T> T getValue(Parameter parameter) {
+		return (T) this.values[parameter.getIndex()];
 	}
 
 	/*

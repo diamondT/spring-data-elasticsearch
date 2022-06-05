@@ -15,13 +15,21 @@
  */
 package org.springframework.data.elasticsearch.repository.query;
 
+import org.springframework.data.repository.query.Parameter;
 import org.springframework.data.repository.query.ParameterAccessor;
+import org.springframework.data.repository.query.Parameters;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
  * @since 3.2
  */
 public interface ElasticsearchParameterAccessor extends ParameterAccessor {
+
+	Parameters<?, ?> getParameters();
+
+	@Nullable
+	<T> T getValue(Parameter parameter);
 
 	/**
 	 * Returns the raw parameter values of the underlying query method.

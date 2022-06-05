@@ -52,4 +52,11 @@ public @interface Query {
 	 * @since 4.2
 	 */
 	boolean count() default false;
+
+	/**
+	 * Returns whether the query defined should be built using named parameters instead of positional parameters.
+	 * 
+	 * @return false by default
+	 */
+	boolean useNamedParameters() default false;
 }

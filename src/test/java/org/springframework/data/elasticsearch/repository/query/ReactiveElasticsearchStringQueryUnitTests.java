@@ -74,7 +74,8 @@ public class ReactiveElasticsearchStringQueryUnitTests extends ElasticsearchStri
 		ReactiveElasticsearchStringQuery elasticsearchStringQuery = createQueryForMethod("findByName", String.class);
 		StubParameterAccessor accessor = new StubParameterAccessor("Luke");
 
-		org.springframework.data.elasticsearch.core.query.Query query = elasticsearchStringQuery.createQuery(accessor);
+		org.springframework.data.elasticsearch.core.query.Query query = elasticsearchStringQuery.createQuery(accessor,
+				false);
 		StringQuery reference = new StringQuery("{ 'bool' : { 'must' : { 'term' : { 'name' : 'Luke' } } } }");
 
 		assertThat(query).isInstanceOf(StringQuery.class);
@@ -89,7 +90,8 @@ public class ReactiveElasticsearchStringQueryUnitTests extends ElasticsearchStri
 				String.class);
 		StubParameterAccessor accessor = new StubParameterAccessor("Luke");
 
-		org.springframework.data.elasticsearch.core.query.Query query = elasticsearchStringQuery.createQuery(accessor);
+		org.springframework.data.elasticsearch.core.query.Query query = elasticsearchStringQuery.createQuery(accessor,
+				false);
 		StringQuery reference = new StringQuery("{ 'bool' : { 'must' : { 'term' : { 'name' : 'Luke' } } } }");
 
 		assertThat(query).isInstanceOf(StringQuery.class);
@@ -144,6 +146,17 @@ public class ReactiveElasticsearchStringQueryUnitTests extends ElasticsearchStri
 				.isEqualTo("{ 'bool' : { 'must' : { 'term' : { 'car' : 'Toyota-Prius' } } } }");
 	}
 
+	@Test
+	@DisplayName("should replace named parameters correctly")
+	void shouldReplaceNamedParametersCorrectly() throws Exception {
+
+		org.springframework.data.elasticsearch.core.query.Query query = createQuery("findWithNamedParameters", "one", "two",
+				"three");
+
+		assertThat(query).isInstanceOf(StringQuery.class);
+		assertThat(((StringQuery) query).getSource()).isEqualTo("name:(three, two, one)");
+	}
+
 	private org.springframework.data.elasticsearch.core.query.Query createQuery(String methodName, Object... args)
 			throws NoSuchMethodException {
 
@@ -151,7 +164,8 @@ public class ReactiveElasticsearchStringQueryUnitTests extends ElasticsearchStri
 		ReactiveElasticsearchQueryMethod queryMethod = getQueryMethod(methodName, argTypes);
 		ReactiveElasticsearchStringQuery elasticsearchStringQuery = queryForMethod(queryMethod);
 
-		return elasticsearchStringQuery.createQuery(new ElasticsearchParametersParameterAccessor(queryMethod, args));
+		return elasticsearchStringQuery.createQuery(new ElasticsearchParametersParameterAccessor(queryMethod, args),
+				queryMethod.hasNamedParameters());
 	}
 
 	private ReactiveElasticsearchStringQuery queryForMethod(ReactiveElasticsearchQueryMethod queryMethod) {
@@ -195,6 +209,8 @@ public class ReactiveElasticsearchStringQueryUnitTests extends ElasticsearchStri
 		@Query("{ 'bool' : { 'must' : { 'term' : { 'car' : '?0' } } } }")
 		Mono<Person> findByCar(Car car);
 
+		@Query(value = "name:(:arg3, :arg2, :arg1)", useNamedParameters = true)
+		Person findWithNamedParameters(String arg1, String arg2, String arg3);
 	}
 
 	/**

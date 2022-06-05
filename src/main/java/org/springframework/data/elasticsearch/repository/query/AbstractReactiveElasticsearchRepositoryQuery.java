@@ -83,7 +83,8 @@ abstract class AbstractReactiveElasticsearchRepositoryQuery implements Repositor
 		ResultProcessor processor = queryMethod.getResultProcessor().withDynamicProjection(parameterAccessor);
 
 		Query query = createQuery(
-				new ConvertingParameterAccessor(elasticsearchOperations.getElasticsearchConverter(), parameterAccessor));
+				new ConvertingParameterAccessor(elasticsearchOperations.getElasticsearchConverter(), parameterAccessor),
+				queryMethod.hasNamedParameters());
 
 		if (queryMethod.hasAnnotatedHighlight()) {
 			query.setHighlightQuery(queryMethod.getAnnotatedHighlightQuery());
@@ -108,9 +109,10 @@ abstract class AbstractReactiveElasticsearchRepositoryQuery implements Repositor
 	 * Creates a {@link Query} instance using the given {@link ParameterAccessor}
 	 *
 	 * @param accessor must not be {@literal null}.
+	 * @param useNamedParameters whether to use named parameters or not
 	 * @return
 	 */
-	protected abstract Query createQuery(ElasticsearchParameterAccessor accessor);
+	protected abstract Query createQuery(ElasticsearchParameterAccessor accessor, boolean useNamedParameters);
 
 	private ReactiveElasticsearchQueryExecution getExecutionToWrap(ElasticsearchParameterAccessor accessor,
 			ReactiveElasticsearchOperations operations) {

@@ -247,4 +247,10 @@ public class ElasticsearchQueryMethod extends QueryMethod {
 		return queryAnnotation != null && queryAnnotation.count();
 	}
 
+	/**
+	 * @return {@literal true} if the method is annotated with {@link Query}(useNamedParameters = true)
+	 */
+	public boolean hasNamedParameters() {
+		return queryAnnotation != null && queryAnnotation.useNamedParameters();
+	}
 }

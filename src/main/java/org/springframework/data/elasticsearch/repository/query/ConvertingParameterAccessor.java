@@ -16,11 +16,12 @@
 package org.springframework.data.elasticsearch.repository.query;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
+import org.springframework.data.repository.query.Parameter;
+import org.springframework.data.repository.query.Parameters;
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,6 +38,16 @@ public class ConvertingParameterAccessor implements ElasticsearchParameterAccess
 
 		this.converter = converter;
 		this.delegate = delegate;
+	}
+
+	@Override
+	public Parameters<?, ?> getParameters() {
+		return delegate.getParameters();
+	}
+
+	@Override
+	public <T> T getValue(Parameter parameter) {
+		return delegate.getValue(parameter);
 	}
 
 	@Override

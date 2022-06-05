@@ -129,13 +129,25 @@ public class ElasticsearchStringQueryUnitTests extends ElasticsearchStringQueryU
 				"{ 'bool' : { 'must' : { 'terms' : { 'name' : [\"hello \\\"Stranger\\\"\",\"Another string\"] } } } }");
 	}
 
+	@Test
+	@DisplayName("should replace named parameters correctly")
+	void shouldReplaceNamedParametersCorrectly() throws Exception {
+
+		org.springframework.data.elasticsearch.core.query.Query query = createQuery("findWithNamedParameters", "one", "two",
+				"three");
+
+		assertThat(query).isInstanceOf(StringQuery.class);
+		assertThat(((StringQuery) query).getSource()).isEqualTo("name:(three, two, one)");
+	}
+
 	private org.springframework.data.elasticsearch.core.query.Query createQuery(String methodName, Object... args)
 			throws NoSuchMethodException {
 
 		Class<?>[] argTypes = Arrays.stream(args).map(Object::getClass).toArray(Class[]::new);
 		ElasticsearchQueryMethod queryMethod = getQueryMethod(methodName, argTypes);
 		ElasticsearchStringQuery elasticsearchStringQuery = queryForMethod(queryMethod);
-		return elasticsearchStringQuery.createQuery(new ElasticsearchParametersParameterAccessor(queryMethod, args));
+		return elasticsearchStringQuery.createQuery(new ElasticsearchParametersParameterAccessor(queryMethod, args),
+				queryMethod.hasNamedParameters());
 	}
 
 	@Test // #1866
@@ -187,6 +199,9 @@ public class ElasticsearchStringQueryUnitTests extends ElasticsearchStringQueryU
 
 		@Query("{ 'bool' : { 'must' : { 'term' : { 'car' : '?0' } } } }")
 		Person findByCar(Car car);
+
+		@Query(value = "name:(:arg3, :arg2, :arg1)", useNamedParameters = true)
+		Person findWithNamedParameters(String arg1, String arg2, String arg3);
 	}
 
 	/**

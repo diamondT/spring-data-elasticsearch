@@ -23,7 +23,6 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.data.elasticsearch.repository.support.StringQueryUtil;
-import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.util.StreamUtils;
 import org.springframework.util.Assert;
 
@@ -56,9 +55,10 @@ public class ElasticsearchStringQuery extends AbstractElasticsearchRepositoryQue
 	public Object execute(Object[] parameters) {
 
 		Class<?> clazz = queryMethod.getResultProcessor().getReturnedType().getDomainType();
-		ParametersParameterAccessor accessor = new ParametersParameterAccessor(queryMethod.getParameters(), parameters);
+		ElasticsearchParametersParameterAccessor accessor = new ElasticsearchParametersParameterAccessor(queryMethod,
+				parameters);
 
-		StringQuery stringQuery = createQuery(accessor);
+		StringQuery stringQuery = createQuery(accessor, queryMethod.hasNamedParameters());
 
 		Assert.notNull(stringQuery, "unsupported query");
 
@@ -97,9 +97,10 @@ public class ElasticsearchStringQuery extends AbstractElasticsearchRepositoryQue
 				: result;
 	}
 
-	protected StringQuery createQuery(ParametersParameterAccessor parameterAccessor) {
-		String queryString = new StringQueryUtil(elasticsearchOperations.getElasticsearchConverter().getConversionService())
-				.replacePlaceholders(this.query, parameterAccessor);
+	protected StringQuery createQuery(ElasticsearchParametersParameterAccessor parameterAccessor,
+			boolean useNamedParameters) {
+		String queryString = new StringQueryUtil(elasticsearchOperations.getElasticsearchConverter().getConversionService(),
+				useNamedParameters).replacePlaceholders(this.query, parameterAccessor);
 		return new StringQuery(queryString);
 	}
 
